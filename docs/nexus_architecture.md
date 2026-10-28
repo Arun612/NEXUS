@@ -1,6 +1,6 @@
-# NEXUS: Architecture & Data Flow
+# NEXUS: Architecture & Data Flow (v2.0 — LangGraph)
 
-Below is the complete architectural graph of the NEXUS multi-agent system. It shows how a user query moves through the 10-step pipeline, interacts with the three-tier Cognitive Memory Fabric, and passes through the Adversarial Verification Parliament.
+Below is the complete architectural graph of the NEXUS multi-agent system. The pipeline is compiled as a **LangGraph `StateGraph`** with typed state (`NexusState`), conditional edges (post-retrieval routing, parliament REJECT loop), and declarative node wiring. Each box below corresponds to a node function in `nexus/nodes.py`.
 
 ```mermaid
 graph TD

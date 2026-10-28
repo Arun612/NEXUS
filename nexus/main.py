@@ -53,23 +53,51 @@ def ingest_file(orchestrator, filepath):
         console.print("  ❌ File is empty or could not be read.", style="red")
         return
 
-    # Chunk the content
-    chunk_size = 512
-    overlap = 50
+    # Smart chunking: split on paragraphs first, then merge into ~1500 char chunks
+    chunk_size = 1500
+    overlap = 200
+    paragraphs = [p.strip() for p in content.split("\n\n") if p.strip() and len(p.strip()) > 30]
+
+    # If no paragraphs detected, fall back to sentence-ish splitting
+    if len(paragraphs) < 3:
+        paragraphs = [s.strip() for s in content.replace(". ", ".\n").split("\n") if s.strip() and len(s.strip()) > 20]
+
+    # Merge small paragraphs into larger chunks
     chunks = []
-    for i in range(0, len(content), chunk_size - overlap):
-        chunk = content[i:i + chunk_size]
-        if chunk.strip():
-            chunk_id = hashlib.md5(f"{filepath}_{i}".encode()).hexdigest()[:12]
-            chunks.append({
-                "id": chunk_id,
-                "content": chunk.strip(),
-                "metadata": {
-                    "source": os.path.basename(filepath),
-                    "chunk_index": len(chunks),
-                    "title": os.path.basename(filepath),
-                },
-            })
+    current_chunk = ""
+    for para in paragraphs:
+        if len(current_chunk) + len(para) < chunk_size:
+            current_chunk += "\n\n" + para if current_chunk else para
+        else:
+            if current_chunk:
+                chunk_id = hashlib.md5(f"{filepath}_{len(chunks)}".encode()).hexdigest()[:12]
+                chunks.append({
+                    "id": chunk_id,
+                    "content": current_chunk,
+                    "metadata": {
+                        "source": os.path.basename(filepath),
+                        "chunk_index": len(chunks),
+                        "title": os.path.basename(filepath),
+                    },
+                })
+            # Start new chunk with overlap from previous
+            if current_chunk and overlap > 0:
+                current_chunk = current_chunk[-overlap:] + "\n\n" + para
+            else:
+                current_chunk = para
+
+    # Don't forget the last chunk
+    if current_chunk.strip():
+        chunk_id = hashlib.md5(f"{filepath}_{len(chunks)}".encode()).hexdigest()[:12]
+        chunks.append({
+            "id": chunk_id,
+            "content": current_chunk,
+            "metadata": {
+                "source": os.path.basename(filepath),
+                "chunk_index": len(chunks),
+                "title": os.path.basename(filepath),
+            },
+        })
 
     orchestrator.ingest_documents(chunks)
     console.print(f"  ✅ Ingested {len(chunks)} chunks from {os.path.basename(filepath)}\n")
@@ -201,7 +229,7 @@ def main():
                     console.print(f"  🧠 Semantic: {orchestrator.semantic.get_stats()}")
                     console.print(f"  ⚙️  Procedural: {len(orchestrator.procedural.records)} records")
                 elif cmd == "/ingest" and len(cmd_parts) > 1:
-                    ingest_file(orchestrator, cmd_parts[1].strip())
+                    ingest_file(orchestrator, cmd_parts[1].strip().strip('"').strip("'"))
                 elif cmd == "/clear":
                     if Confirm.ask("  Clear all memory?"):
                         orchestrator.episodic.clear()

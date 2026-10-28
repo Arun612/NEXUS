@@ -27,6 +27,9 @@ python-dotenv>=1.0.0
 # Async Support
 aiohttp>=3.9.0
 
+# LangGraph (orchestration)
+langgraph>=0.2.0
+
 # Document Processing
 pypdf>=4.0.0
 

@@ -19,6 +19,7 @@ from nexus.config import LLMClient, EmbeddingEngine, EmbeddingConfig, RetrievalC
 logger = logging.getLogger(__name__)
 
 
+
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 #  Base Agent — simple parent class for all agents
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

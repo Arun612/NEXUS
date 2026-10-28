@@ -226,7 +226,7 @@ def print_banner():
 ║   ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝               ║
 ║                                                              ║
 ║   Neuro-Episodic Expert Unified System                       ║
-║   Multi-Agent Agentic RAG v1.0                               ║
+║   Multi-Agent Agentic RAG v2.0 (LangGraph)                  ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 """
